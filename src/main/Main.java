@@ -20,6 +20,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import display.LoginPanel;
+import display.MainPanel;
 import display.StartPanel;
 
 public class Main extends JFrame{
@@ -44,6 +45,7 @@ public class Main extends JFrame{
 		managedFrame.initialize();
 		managedFrame.addPanels(StartPanel.class);
 		managedFrame.addPanels(LoginPanel.class);
+		managedFrame.addPanels(MainPanel.class);
 		managedFrame.changeAndUpdate(StartPanel.class);
 		
 //		A panel = new A();

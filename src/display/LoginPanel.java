@@ -20,6 +20,7 @@ import main.LoginManager;
 import main.Main;
 import main.ManagedFrame;
 import main.ResourceManager;
+import main.Sound;
 
 @SuppressWarnings("serial")
 public class LoginPanel extends JPanel {
@@ -59,14 +60,19 @@ public class LoginPanel extends JPanel {
 				int result = loginManager.login(user, password);
 				switch (result) {
 				case LoginManager.LOGIN_SUCCESS:
+					new Sound(resourceManager.getSoundFile("ok")).playSound();
 					JOptionPane.showMessageDialog(managedFrame, "로그인 성공");
+					userField.setText(""); passwordField.setText(""); pwVerifyField.setText("");
+					managedFrame.changeAndUpdate(MainPanel.class);
 					break;
 					
 				case LoginManager.LOGIN_ID_ERROR:
+					new Sound(resourceManager.getSoundFile("warning")).playSound();
 					JOptionPane.showMessageDialog(managedFrame, "아이디를 확인하세요!");
 					break;
 					
 				case LoginManager.LOGIN_PW_ERROR:
+					new Sound(resourceManager.getSoundFile("warning")).playSound();
 					JOptionPane.showMessageDialog(managedFrame, "비밀번호가 일치하지 않습니다!");
 					break;
 
@@ -91,15 +97,18 @@ public class LoginPanel extends JPanel {
 				int result = loginManager.register(user, password, passwordVerify);
 				switch (result) {
 				case LoginManager.REGIST_SUCCESS:
+					new Sound(resourceManager.getSoundFile("ok")).playSound();
 					JOptionPane.showMessageDialog(managedFrame, "가입 성공");
 					userField.setText(""); passwordField.setText(""); pwVerifyField.setText("");
 					break;
 					
 				case LoginManager.REGIST_ID_ERROR:
+					new Sound(resourceManager.getSoundFile("warning")).playSound();
 					JOptionPane.showMessageDialog(managedFrame, "아이디가 중복이거나 비어있습니다!");
 					break;
 					
 				case LoginManager.REGIST_PW_ERROR:
+					new Sound(resourceManager.getSoundFile("warning")).playSound();
 					JOptionPane.showMessageDialog(managedFrame, "비밀번호가 일치하지 않습니다!");
 					break;
 

@@ -10,6 +10,11 @@ import java.awt.Font;
 
 @SuppressWarnings("serial")
 public class MainPanel extends JPanel {
+	private JLabel welcomeText;
+	private JLabel netAssetText;
+	private JLabel liabilityText;
+
+	
 	public MainPanel() {
 		setSize(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
 		setLayout(null);
@@ -32,7 +37,7 @@ public class MainPanel extends JPanel {
 		add(btnNewButton);
 		//////////////////////////////////////////////////////////////////////////////////
 		JLabel backGround = new JLabel("");
-		backGround.setIcon(new ImageIcon("/Users/isugyun/eclipse-workspace/GuiBank18/.guibankdata/res/image/menu.png"));
+		backGround.setIcon(new ImageIcon("C:\\Users\\Administrator\\Desktop\\GUIBank18\\GUIBank18\\.guibankdata\\res\\image\\menu.png"));
 		backGround.setSize(1280, 720);
 		add(backGround);
 		//////////////////////////////////////////////////////////////////////////////////
