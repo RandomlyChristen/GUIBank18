@@ -20,7 +20,6 @@ public class LoginManager {
 	public final static int REGIST_ID_ERROR = -5;
 	public final static int REGIST_PW_ERROR = -6;
 	
-	private ResourceManager resourceManager = ResourceManager.getInstance();
 	// 로그인 상태를 확인하기 위한 필드, 한번에 한번의 로그인 정보만 받을 수 있음
 	private boolean	signedIn = false;
 	private String user = "";
@@ -28,12 +27,12 @@ public class LoginManager {
 	
 	private LoginManager() {}
 	
-	public int login(String user, String password) {
+	public int login(String user, String password, ResourceManager resourceManager, ManagedFrame managedFrame) {
 		if (isSignedIn()) {  // 이미 로그인 되어있으면 반환
 			System.out.println("이미 로그인 되어 있음!");
 			return LOGIN_ID_ERROR;
 		}
-		if (!isExistingUser(user) || (user.equals(""))) { // 입력으로부터 값을 찾을 수 없거나, 입력이 비어있으면 반환
+		if (!isExistingUser(user, resourceManager) || (user.equals(""))) { // 입력으로부터 값을 찾을 수 없거나, 입력이 비어있으면 반환
 			System.out.println("아이디를 확인하세요!");
 			return LOGIN_ID_ERROR;
 		}
@@ -46,7 +45,7 @@ public class LoginManager {
 			
 			if (pwData.equals(password)) {  // 입력과 비밀번호가 일치하는지 확인
 				this.user = user; this.signedIn = true;  // 입력으로부터 로그인 성공, 현재상태 -> 로그인됨
-				System.out.println("로그인성공!"); startTimer(); // 30초내에 아무런 행동이 없으면 로그아
+				System.out.println("로그인성공!"); startTimer(managedFrame); // 30초내에 아무런 행동이 없으면 로그아
 				return LOGIN_SUCCESS;
 			} else {
 				System.out.println("비밀번호틀림!");
@@ -59,8 +58,8 @@ public class LoginManager {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public int register(String user, String password, String pwVerify) {
-		if (isExistingUser(user) || user.equals("")) {  // 아이디가 중복이면 반환
+	public int register(String user, String password, String pwVerify, ResourceManager resourceManager) {
+		if (isExistingUser(user, resourceManager) || user.equals("")) {  // 아이디가 중복이면 반환
 			System.out.println("아이디를 확인하세요!");
 			return	REGIST_ID_ERROR;
 		}
@@ -88,25 +87,25 @@ public class LoginManager {
 		}
 	}
 	
-	public void resetTimer() {
+	public void resetTimer() {  // 로그아웃 타임아웃을 초기화
 		timeLimit = 30;
 	}
 	
-	private void startTimer() {
-		resetTimer();
+	private void startTimer(ManagedFrame managedFrame) {  // 30초간 입력이 없으면 로그아웃을 하는 메소드
+		resetTimer();  // 시작 전 초기화
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while (timeLimit > 0) {
+				while (timeLimit > 0) {  // 제한시간이 0 이하가 되면 탈출
 					try {
 						Thread.sleep(1000);
-						timeLimit -= 1;
+						timeLimit -= 1;  // 1초마다 제한시간 감소
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				ManagedFrame.getInstance().changeAndUpdate(StartPanel.class);
-				signedIn = false;
+				managedFrame.changeAndUpdate(StartPanel.class);  // 제한시간이 완료되면 시작화면으로 이동
+				signedIn = false;  // 로그인 해제
 			}
 		}).start();
 	}
@@ -119,7 +118,7 @@ public class LoginManager {
 		return user;
 	}
 	
-	public boolean isExistingUser(String user) {
+	public boolean isExistingUser(String user, ResourceManager resourceManager) {
 		return resourceManager.getUserFile(user) != null;
 	}
 	

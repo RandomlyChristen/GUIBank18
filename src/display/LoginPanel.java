@@ -57,7 +57,7 @@ public class LoginPanel extends JPanel {
 					e1.printStackTrace();
 				}
 				String user = userField.getText(); String password = new String(passwordField.getPassword());
-				int result = loginManager.login(user, password);
+				int result = loginManager.login(user, password, resourceManager, managedFrame);
 				switch (result) {
 				case LoginManager.LOGIN_SUCCESS:
 					new Sound(resourceManager.getSoundFile("ok")).playSound();
@@ -94,7 +94,7 @@ public class LoginPanel extends JPanel {
 				}
 				String user = userField.getText(); String password = new String(passwordField.getPassword());
 				String passwordVerify = new String(pwVerifyField.getPassword());
-				int result = loginManager.register(user, password, passwordVerify);
+				int result = loginManager.register(user, password, passwordVerify, resourceManager);
 				switch (result) {
 				case LoginManager.REGIST_SUCCESS:
 					new Sound(resourceManager.getSoundFile("ok")).playSound();

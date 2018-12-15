@@ -83,11 +83,13 @@ public class MainPanel extends JPanel {
 		openButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				System.out.println(accountManager.getBalanceOfUser(loginManager, resourceManager));
+				loginManager.resetTimer();
 				new Sound(resourceManager.getSoundFile("button")).playSound(); loginManager.resetTimer();
 				String randAccount;
 				do {
 					randAccount = Integer.toString(((int)(Math.random() * 9000000) + 999999));
-				} while (accountManager.isExistingAccount(randAccount));  // 계좌가 존재하는지 확인하자
+				} while (accountManager.isExistingAccount(randAccount, resourceManager));  // 계좌가 존재하는지 확인하자
 				
 				JLabel account = new JLabel("당신의 계좌 : " + randAccount);
 				JPasswordField newPassword = new JPasswordField();
@@ -102,7 +104,7 @@ public class MainPanel extends JPanel {
 				String password = new String(newPassword.getPassword());
 				String passwordVerify = new String(passwordConfirm.getPassword());
 				
-				int result = accountManager.createNewAccount(randAccount, password, passwordVerify);
+				int result = accountManager.createNewAccount(randAccount, password, passwordVerify, loginManager, resourceManager);
 				
 				switch (result) {
 				case AccountManager.CREATE_ACCOUNT_SUCCESS:
@@ -133,7 +135,7 @@ public class MainPanel extends JPanel {
 		add(terminateBurron);
 		//////////////////////////////////////////////////////////////////////////////////
 		JLabel backGround = new JLabel("");
-		backGround.setIcon(new ImageIcon("C:\\Users\\DISKSMART\\Desktop\\eclipse-workspace\\GUIBank18\\.guibankdata\\res\\image\\menu.png"));
+		backGround.setIcon(new ImageIcon(resourceManager.getImageFile("menu").getAbsolutePath()));
 		backGround.setSize(1280, 720);
 		add(backGround);
 		//////////////////////////////////////////////////////////////////////////////////
