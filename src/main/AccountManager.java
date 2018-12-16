@@ -4,13 +4,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Queue;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,6 +33,14 @@ public class AccountManager {
 	public final static int TRANSTFER_SUCCESS = -1;
 	public final static int TRANSTFER_FAILURE = -2;
 	
+	public final static int BORROW_SUCCESS = -1;
+	public final static int BORROW_FAILURE = -2;
+	
+	public final static int REFUND_SUCCESS = -1;
+	public final static int REFUND_LARGER_INPUT = -2;
+	public final static int REFUND_LOW_BALANCE = -3;
+	public final static int REFUND_FAILURE = -4;
+	
 	private double rateSaving = 0.02;
 	private double rateLone = 0.03;
 	
@@ -43,6 +49,49 @@ public class AccountManager {
 	// 존재하는 계좌인지 확인하는 메소드
 	public boolean isExistingAccount(String account, ResourceManager resourceManager) {
 		return resourceManager.getAccountFile(account) != null;
+	}
+	
+	// 계좌의 비밀번호를 확인하는 메소드
+	public boolean isCorrectPassword(String password, String account, ResourceManager resourceManager) {
+		File accountFile = resourceManager.getAccountFile(account);
+		JSONParser jsonParser = new JSONParser();  // 입력 계좌로부터 값에 해당하는 파일을 파싱
+		try {
+			JSONObject jsonObject = (JSONObject)jsonParser.parse(new FileReader(accountFile));
+			String passOfAccount = (String)jsonObject.get("password");  // 비밀번호를 가져옴
+			return passOfAccount.equals(password);
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	// 계좌의 타입을 반환하는 메소드
+	public int getTypeOfAccount(String account, ResourceManager resourceManager) {
+		File accountFile = resourceManager.getAccountFile(account);
+		JSONParser jsonParser = new JSONParser();  // 입력 계좌로부터 값에 해당하는 파일을 파싱
+		try {
+			JSONObject jsonObject = (JSONObject)jsonParser.parse(new FileReader(accountFile));
+			long type = (long)jsonObject.get("type");  // 비밀번호를 가져옴
+			return (int) type;
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+			return -1;
+		}
+	}
+	
+	// 계좌의 거래내역을 반환하는 메소드
+	@SuppressWarnings("unchecked")
+	public String[] getArrayOfTransactions(String account, ResourceManager resourceManager) {
+		File accountFile = resourceManager.getAccountFile(account);
+		JSONParser jsonParser = new JSONParser();  // 입력 계좌로부터 값에 해당하는 파일을 파싱
+		try {
+			JSONObject jsonObject = (JSONObject)jsonParser.parse(new FileReader(accountFile));
+			JSONArray transactions = (JSONArray)jsonObject.get("transactions");  // 거래내역을 가져옴
+			return (String[]) transactions.toArray(new String[transactions.size()]);
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+			return new String[] {};
+		}
 	}
 	
 	// 입금 메소드
@@ -63,6 +112,51 @@ public class AccountManager {
 		} catch (IOException | ParseException e) {
 			e.printStackTrace();
 			return DEPOSIT_NOT_DEPOSABLE;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public int borrow(String account, long cash, ResourceManager resourceManager) {
+		File accountFile = resourceManager.getAccountFile(account);
+		JSONParser jsonParser = new JSONParser();  // 입력 계좌로부터 값에 해당하는 파일을 파싱
+		try {
+			JSONObject jsonObject = (JSONObject)jsonParser.parse(new FileReader(accountFile));
+			JSONArray transactions = (JSONArray)jsonObject.get("transactions");  // 거래내역을 가져옴
+			long balance = (long) jsonObject.get("balance"); balance += cash;
+			long liabilities = (long) jsonObject.get("liabilities"); liabilities += cash;  // 부채를 추가
+			jsonObject.put("balance", balance); jsonObject.put("liabilities", liabilities); // 계좌에 변경된 값을 추가
+			pushTransaction(transactions, "대출 : " + cash);
+			FileWriter fileWriter = new FileWriter(accountFile);
+			fileWriter.write(jsonObject.toJSONString());
+			fileWriter.flush(); fileWriter.close();  // 추가된 데이터를 파일로 저장
+			return BORROW_SUCCESS;
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+			return BORROW_FAILURE;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public int refund(String account, long cash, ResourceManager resourceManager) {
+		File accountFile = resourceManager.getAccountFile(account);
+		JSONParser jsonParser = new JSONParser();  // 입력 계좌로부터 값에 해당하는 파일을 파싱
+		try {
+			JSONObject jsonObject = (JSONObject)jsonParser.parse(new FileReader(accountFile));
+			JSONArray transactions = (JSONArray)jsonObject.get("transactions");  // 거래내역을 가져옴
+			long liabilities = (long) jsonObject.get("liabilities"); 
+			long balance = (long) jsonObject.get("balance");
+			if (balance < cash) return REFUND_LOW_BALANCE;
+			if (liabilities < cash) return REFUND_LARGER_INPUT;
+			balance -= cash; liabilities -= cash;  // 부채를 상환
+			jsonObject.put("balance", balance); jsonObject.put("liabilities", liabilities);  // 계좌에 변경된 값을 추가
+			pushTransaction(transactions, "상환 : " + cash);
+			FileWriter fileWriter = new FileWriter(accountFile);
+			fileWriter.write(jsonObject.toJSONString());
+			fileWriter.flush(); fileWriter.close();  // 추가된 데이터를 파일로 저장
+			return REFUND_SUCCESS;
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+			return REFUND_FAILURE;
 		}
 	}
 	
@@ -88,6 +182,7 @@ public class AccountManager {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public int transfer(String fromAccount, String toAccount, long amount, LoginManager loginManager, ResourceManager resourceManager) {
 		File fromFile = resourceManager.getAccountFile(fromAccount);
 		File toFile = resourceManager.getAccountFile(toAccount);
@@ -302,7 +397,7 @@ public class AccountManager {
 		int currentYear = currentDate.get(Calendar.YEAR); int lastYear = lastDate.get(Calendar.YEAR);
 		int currentMonth = currentDate.get(Calendar.MONTH) + 1; int lastMonth = lastDate.get(Calendar.MONTH) + 1;
 		// 개월 수 계산법, 예) (2018-12, 2020-5) -> (5 - 12) + (12 * (2020 - 2018))
-		int monthlyDifference = (currentMonth - lastMonth) + (12 * (currentYear - lastYear));  // 마지막 기록과 현재시간을 비교하여 개월 수를 구함
+		int monthlyDifference = (currentMonth - lastMonth) + (12 * (currentYear - lastYear)) + 12;  // 마지막 기록과 현재시간을 비교하여 개월 수를 구함
 		for (int i = 0; i < monthlyDifference; i++) {
 			result += result * rate;  // 1개월 마다 복리로 할당
 		}

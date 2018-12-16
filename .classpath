@@ -6,7 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/DISKSMART/Desktop/workspace/GUIBank18/jlayer-1.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/DISKSMART/Desktop/workspace/GUIBank18/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/isugyun/eclipse-workspace/GuiBank18/jlayer-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/isugyun/eclipse-workspace/GuiBank18/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
