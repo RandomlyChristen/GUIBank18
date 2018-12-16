@@ -2,6 +2,7 @@ package main;
 
 import java.io.File;
 import java.util.Hashtable;
+import java.util.Set;
 
 public class ResourceManager {
 	// 계좌, 유저, 이미지, 효과 등 파일리소스를 관리하기 위한 상수
@@ -33,6 +34,10 @@ public class ResourceManager {
 				}
 			}
 		}
+	}
+	
+	public Set<String> getAccounts() {
+		return accountMap.keySet();
 	}
 	
 	public void accountFileAdded(File file) {

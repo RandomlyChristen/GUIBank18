@@ -41,6 +41,9 @@ public class Main extends JFrame{
 	}
 	
 	public static void main(String[] args) throws InterruptedException {
+		ResourceManager resourceManager = ResourceManager.getInstance();
+		AccountManager accountManager = AccountManager.getInstance();
+		accountManager.makeInterestForAll(resourceManager);
 		ManagedFrame managedFrame = ManagedFrame.getInstance();
 		managedFrame.initialize();
 		managedFrame.addPanels(StartPanel.class);
